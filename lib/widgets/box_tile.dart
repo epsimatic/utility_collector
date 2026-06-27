@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/box_data.dart';
 
-enum _BoxStatus { complete, partial, empty }
-
 class BoxTile extends StatelessWidget {
   const BoxTile({
     super.key,
@@ -16,44 +14,21 @@ class BoxTile extends StatelessWidget {
   final BoxData data;
   final VoidCallback onTap;
 
-  _BoxStatus _statusFor(BoxData d) {
-    if (d.isComplete) return _BoxStatus.complete;
-    if (d.filledCount > 0) return _BoxStatus.partial;
-    return _BoxStatus.empty;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final status = _statusFor(data);
 
-    final Color statusColor = switch (status) {
-      _BoxStatus.complete =>
-        isDark ? Colors.green.shade300 : Colors.green.shade700,
-      _BoxStatus.partial =>
-        isDark ? Colors.amber.shade300 : Colors.amber.shade800,
-      _BoxStatus.empty => theme.colorScheme.onSurfaceVariant,
-    };
-
-    final String statusLabel = switch (status) {
-      _BoxStatus.complete => 'Собрано',
-      _BoxStatus.partial => 'Частично',
-      _BoxStatus.empty => 'Не собрано',
-    };
-
-    final String semanticLabel = switch (status) {
-      _BoxStatus.complete => 'Box $boxNumber, collected',
-      _BoxStatus.partial => 'Box $boxNumber, partially collected',
-      _BoxStatus.empty => 'Box $boxNumber, not collected',
-    };
+    final Color statusColor = data.isComplete
+        ? (isDark ? Colors.green.shade300 : Colors.green.shade700)
+        : theme.colorScheme.onSurfaceVariant;
 
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Semantics(
-          label: semanticLabel,
+          label: data.status,
           button: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -69,7 +44,7 @@ class BoxTile extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    statusLabel,
+                    data.status,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w600,

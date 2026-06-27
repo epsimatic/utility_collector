@@ -14,9 +14,15 @@ class BoxData {
   bool get hasT1 => t1 != null;
   bool get hasT2 => t2 != null;
 
-  bool get isComplete => hasT0 && hasT1 && hasT2;
-
-  int get filledCount => (hasT0 ? 1 : 0) + (hasT1 ? 1 : 0) + (hasT2 ? 1 : 0);
+  bool get isComplete => hasT0 || (hasT1 && hasT2);
+  bool get isEmpty => !hasT0 && !hasT1 && !hasT2;
+  String get status => hasT0
+      ? 'Заполнено (T0)'
+      : isComplete
+      ? 'Заполнено (T1/T2)'
+      : isEmpty
+      ? 'Не заполнено'
+      : 'Частично';
 
   double? valueFor(BoxMetric slot) => switch (slot) {
     BoxMetric.t0 => t0,

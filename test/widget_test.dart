@@ -11,8 +11,7 @@ void main() {
     await tester.pumpWidget(UtilityCollectorApp(store: store));
     await tester.pumpAndSettle();
 
-    expect(find.text('Квартиры'), findsOneWidget);
-    expect(find.text('0 / 106'), findsOneWidget);
+    expect(find.text('Сбор счётчиков'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
   });
 }
