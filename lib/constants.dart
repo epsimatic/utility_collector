@@ -1,1 +1,1 @@
-const int kBoxCount = 20;
+const int kBoxCount = 106;
