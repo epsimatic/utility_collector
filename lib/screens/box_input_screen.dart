@@ -89,7 +89,6 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     final canPrev = _index > 0;
     final canNext = _index < widget.store.boxCount - 1;
     final boxNumber = _index + 1;
-    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Квартира')),
@@ -131,13 +130,11 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
               Text("Электричество", style: theme.textTheme.headlineSmall),
               Card(
                 color: theme.colorScheme.surfaceDim,
-                clipBehavior: Clip.hardEdge,
+                // clipBehavior: Clip.hardEdge,
                 child: Column(
                   spacing: 8.0,
                   children: [
-                    if (keyboardOpen) SizedBox.shrink(),
-                    if (!keyboardOpen)
-                      Image.asset("assets/electricity_meter.jpeg"),
+                    SizedBox.shrink(),
                     for (final slot in BoxMetric.values)
                       _MetricField(
                         label: "Расход ${slot.name.toUpperCase()}",
@@ -145,7 +142,7 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
                         focusNode: _focusNodes[slot]!,
                         onCommit: () => _commitField(slot),
                       ),
-                    SizedBox(height: 0.0),
+                    SizedBox.shrink(),
                   ],
                 ),
               ),
