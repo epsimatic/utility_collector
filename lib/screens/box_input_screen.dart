@@ -89,6 +89,7 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     final canPrev = _index > 0;
     final canNext = _index < widget.store.boxCount - 1;
     final boxNumber = _index + 1;
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Квартира')),
@@ -134,7 +135,9 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
                 child: Column(
                   spacing: 8.0,
                   children: [
-                    Image.asset("assets/electricity_meter.jpeg"),
+                    if (keyboardOpen) SizedBox.shrink(),
+                    if (!keyboardOpen)
+                      Image.asset("assets/electricity_meter.jpeg"),
                     for (final slot in BoxMetric.values)
                       _MetricField(
                         label: "Расход ${slot.name.toUpperCase()}",
@@ -181,7 +184,10 @@ class _MetricField extends StatelessWidget {
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
         ],
         onChanged: (_) => onCommit(),
-        onSubmitted: (_) => onCommit(),
+        onSubmitted: (_) {
+          onCommit();
+          FocusScope.of(context).nextFocus();
+        },
         onEditingComplete: onCommit,
         decoration: InputDecoration(
           labelText: label,
