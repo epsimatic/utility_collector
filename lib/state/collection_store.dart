@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants.dart';
+import '../locator.dart';
 import '../models/box_data.dart';
+import 'app_settings.dart';
 
 class CollectionStore extends ChangeNotifier {
   CollectionStore._(this._prefs, this._boxes);
@@ -16,16 +17,31 @@ class CollectionStore extends ChangeNotifier {
 
   static Future<CollectionStore> load() async {
     final prefs = await SharedPreferences.getInstance();
+    final settings = getIt<AppSettings>();
+    final boxCount = settings.boxCount;
+    final metricCount = settings.metricCount;
     final raw = prefs.getString(_storageKey);
-    final List<BoxData> boxes = List.generate(kBoxCount, (_) => BoxData());
+    final List<BoxData> boxes = List.generate(
+      boxCount,
+      (_) => BoxData(metricCount: metricCount),
+    );
     if (raw != null) {
       try {
         final decoded = jsonDecode(raw);
         if (decoded is List) {
-          for (var i = 0; i < decoded.length && i < kBoxCount; i++) {
+          for (var i = 0; i < decoded.length && i < boxCount; i++) {
             final entry = decoded[i];
             if (entry is Map) {
-              boxes[i] = BoxData.fromJson(entry.cast<String, dynamic>());
+              final loaded = BoxData.fromJson(entry.cast<String, dynamic>());
+              if (loaded.metricCount == metricCount) {
+                boxes[i] = loaded;
+              } else {
+                final values = <double?>[];
+                for (var m = 0; m < metricCount; m++) {
+                  values.add(m < loaded.metricCount ? loaded.valueAt(m) : null);
+                }
+                boxes[i] = BoxData(values: values);
+              }
             }
           }
         }
@@ -38,7 +54,7 @@ class CollectionStore extends ChangeNotifier {
     return CollectionStore._(prefs, boxes);
   }
 
-  int get boxCount => kBoxCount;
+  int get boxCount => getIt<AppSettings>().boxCount;
 
   BoxData boxAt(int index) => _boxes[index];
 
@@ -46,7 +62,8 @@ class CollectionStore extends ChangeNotifier {
     return _boxes[index].valueAt(slot) != null;
   }
 
-  int get filledBoxCount => _boxes.where((b) => b.isComplete).length;
+  int get filledBoxCount =>
+      _boxes.take(boxCount).where((b) => b.isComplete).length;
 
   Future<void> setMetric(
     int index,
@@ -64,10 +81,39 @@ class CollectionStore extends ChangeNotifier {
   }
 
   Future<void> clearAll() async {
+    final metricCount = getIt<AppSettings>().metricCount;
+    var changed = false;
+    for (var i = 0; i < boxCount; i++) {
+      if (_boxes[i] != BoxData(metricCount: metricCount)) {
+        _boxes[i] = BoxData(metricCount: metricCount);
+        changed = true;
+      }
+    }
+    if (!changed) return;
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> resizeBoxes(int newCount) async {
+    if (newCount == boxCount) return;
+    while (_boxes.length < newCount) {
+      final metricCount = getIt<AppSettings>().metricCount;
+      _boxes.add(BoxData(metricCount: metricCount));
+    }
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> updateMetricCount(int newMetricCount) async {
     var changed = false;
     for (var i = 0; i < _boxes.length; i++) {
-      if (_boxes[i] != BoxData()) {
-        _boxes[i] = BoxData();
+      final box = _boxes[i];
+      if (box.metricCount != newMetricCount) {
+        final values = <double?>[];
+        for (var m = 0; m < newMetricCount; m++) {
+          values.add(m < box.metricCount ? box.valueAt(m) : null);
+        }
+        _boxes[i] = BoxData(values: values);
         changed = true;
       }
     }

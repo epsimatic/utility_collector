@@ -5,7 +5,7 @@ import '../constants.dart';
 @immutable
 class BoxData {
   BoxData({int? metricCount, List<double?>? values})
-    : _values = values ?? List.filled(metricCount ?? kMetricCount, null);
+    : _values = values ?? List.filled(metricCount ?? kDefaultMetricCount, null);
 
   final List<double?> _values;
 
@@ -16,10 +16,10 @@ class BoxData {
   bool get isComplete => _values.any((v) => v != null);
   bool get isEmpty => _values.every((v) => v == null);
 
-  String get status {
+  String status(String Function(int) label) {
     final filled = [
       for (var i = 0; i < _values.length; i++)
-        if (_values[i] != null && _values[i] != 0) metricLabel(i),
+        if (_values[i] != null && _values[i] != 0) label(i),
     ];
     return filled.isEmpty ? 'Не заполнено' : filled.join(', ');
   }

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
+import 'locator.dart';
 import 'screens/overview_screen.dart';
-import 'state/collection_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final store = await CollectionStore.load();
-  runApp(UtilityCollectorApp(store: store));
+  await configureDependencies();
+  runApp(const UtilityCollectorApp());
 }
 
 class UtilityCollectorApp extends StatelessWidget {
-  const UtilityCollectorApp({super.key, required this.store});
-
-  final CollectionStore store;
+  const UtilityCollectorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Сбор счётчиков',
+      // locale: const Locale('ru', 'RU'),
+      // supportedLocales: const [Locale('en', 'US'), Locale('ru', 'RU')],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
@@ -30,7 +30,7 @@ class UtilityCollectorApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: OverviewScreen(store: store),
+      home: const OverviewScreen(),
     );
   }
 }

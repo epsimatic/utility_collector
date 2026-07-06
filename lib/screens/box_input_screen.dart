@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:watch_it/watch_it.dart';
 
-import '../constants.dart';
+import '../locator.dart';
+import '../state/app_settings.dart';
 import '../state/collection_store.dart';
 
-class BoxInputScreen extends StatefulWidget {
-  const BoxInputScreen({super.key, required this.store, this.initialIndex = 0});
+class BoxInputScreen extends WatchingStatefulWidget {
+  const BoxInputScreen({super.key, this.initialIndex = 0});
 
-  final CollectionStore store;
   final int initialIndex;
 
   @override
@@ -22,14 +23,15 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex.clamp(0, widget.store.boxCount - 1);
+    final store = getIt<CollectionStore>();
+    final metricCount = getIt<AppSettings>().metricCount;
+    _index = widget.initialIndex.clamp(0, store.boxCount - 1);
     _controllers = List.generate(
-      kMetricCount,
-      (i) => TextEditingController(
-        text: _format(widget.store.boxAt(_index).valueAt(i)),
-      ),
+      metricCount,
+      (i) =>
+          TextEditingController(text: _format(store.boxAt(_index).valueAt(i))),
     );
-    _focusNodes = List.generate(kMetricCount, (_) => FocusNode());
+    _focusNodes = List.generate(metricCount, (_) => FocusNode());
   }
 
   String _format(double? v) {
@@ -39,34 +41,36 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
   }
 
   void _commitField(int slot) {
+    final store = getIt<CollectionStore>();
     final text = _controllers[slot].text.trim();
     if (text.isEmpty) {
-      widget.store.setMetric(_index, slot, null, clear: true);
+      store.setMetric(_index, slot, null, clear: true);
       return;
     }
     final parsed = double.tryParse(text);
     if (parsed == null || parsed.isNaN || parsed.isInfinite || parsed < 0) {
       return;
     }
-    widget.store.setMetric(_index, slot, parsed, clear: false);
+    store.setMetric(_index, slot, parsed, clear: false);
   }
 
   void _commitAll() {
-    for (var slot = 0; slot < kMetricCount; slot++) {
+    final metricCount = getIt<AppSettings>().metricCount;
+    for (var slot = 0; slot < metricCount; slot++) {
       _commitField(slot);
     }
   }
 
   void _goto(int newIndex) {
-    if (newIndex < 0 || newIndex >= widget.store.boxCount) return;
+    final store = getIt<CollectionStore>();
+    final metricCount = getIt<AppSettings>().metricCount;
+    if (newIndex < 0 || newIndex >= store.boxCount) return;
     if (newIndex == _index) return;
     _commitAll();
     setState(() {
       _index = newIndex;
-      for (var slot = 0; slot < kMetricCount; slot++) {
-        _controllers[slot].text = _format(
-          widget.store.boxAt(_index).valueAt(slot),
-        );
+      for (var slot = 0; slot < metricCount; slot++) {
+        _controllers[slot].text = _format(store.boxAt(_index).valueAt(slot));
       }
     });
   }
@@ -84,9 +88,12 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final store = getIt<CollectionStore>();
+    final metricCount = watchPropertyValue((AppSettings s) => s.metricCount);
+    final metricLabel = getIt<AppSettings>().metricLabel;
     final theme = Theme.of(context);
     final canPrev = _index > 0;
-    final canNext = _index < widget.store.boxCount - 1;
+    final canNext = _index < store.boxCount - 1;
     final boxNumber = _index + 1;
 
     return Scaffold(
@@ -126,22 +133,21 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text("Электричество", style: theme.textTheme.headlineSmall),
+              Text("Счётчики", style: theme.textTheme.headlineSmall),
               Card(
                 color: theme.colorScheme.surfaceDim,
-                // clipBehavior: Clip.hardEdge,
                 child: Column(
                   spacing: 8.0,
                   children: [
-                    SizedBox.shrink(),
-                    for (var slot = 0; slot < kMetricCount; slot++)
+                    const SizedBox.shrink(),
+                    for (var slot = 0; slot < metricCount; slot++)
                       _MetricField(
                         label: 'Расход ${metricLabel(slot)}',
                         controller: _controllers[slot],
                         focusNode: _focusNodes[slot],
                         onCommit: () => _commitField(slot),
                       ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                   ],
                 ),
               ),
