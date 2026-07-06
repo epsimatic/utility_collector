@@ -52,14 +52,16 @@ class _SettingsState extends State<Settings> {
     final metricCount = watchPropertyValue((AppSettings s) => s.metricCount);
 
     return AlertDialog(
+      icon: Icon(Icons.settings),
       title: const Text("Настройки"),
-      contentPadding: EdgeInsets.zero,
+      insetPadding: EdgeInsets.all(16.0),
+      contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 4.0),
           ListTile(
-            leading: const Icon(Icons.apartment),
+            // leading: const Icon(Icons.apartment),
             contentPadding: const EdgeInsets.symmetric(horizontal: 24.0),
             title: const Text('Количество квартир'),
             trailing: SizedBox(
@@ -80,7 +82,7 @@ class _SettingsState extends State<Settings> {
           ),
           const Divider(height: 1.0),
           ListTile(
-            leading: const Icon(Icons.format_list_numbered),
+            // leading: const Icon(Icons.format_list_numbered),
             contentPadding: const EdgeInsets.symmetric(horizontal: 24.0),
             title: const Text('Количество тарифов'),
             trailing: RadioGroup<int>(
@@ -104,7 +106,7 @@ class _SettingsState extends State<Settings> {
           ),
           const Divider(height: 1.0),
           ListTile(
-            leading: const Icon(Icons.filter_1),
+            // leading: const Icon(Icons.filter_1),
             contentPadding: const EdgeInsets.symmetric(horizontal: 24.0),
             title: const Text('Тарифы начинаются с'),
             trailing: RadioGroup<bool>(
