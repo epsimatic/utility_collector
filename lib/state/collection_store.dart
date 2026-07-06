@@ -17,10 +17,7 @@ class CollectionStore extends ChangeNotifier {
   static Future<CollectionStore> load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_storageKey);
-    final List<BoxData> boxes = List.generate(
-      kBoxCount,
-      (_) => const BoxData(),
-    );
+    final List<BoxData> boxes = List.generate(kBoxCount, (_) => BoxData());
     if (raw != null) {
       try {
         final decoded = jsonDecode(raw);
@@ -45,15 +42,15 @@ class CollectionStore extends ChangeNotifier {
 
   BoxData boxAt(int index) => _boxes[index];
 
-  bool isFilled(int index, BoxMetric slot) {
-    return _boxes[index].valueFor(slot) != null;
+  bool isFilled(int index, int slot) {
+    return _boxes[index].valueAt(slot) != null;
   }
 
   int get filledBoxCount => _boxes.where((b) => b.isComplete).length;
 
   Future<void> setMetric(
     int index,
-    BoxMetric slot,
+    int slot,
     double? value, {
     required bool clear,
   }) async {
@@ -69,8 +66,8 @@ class CollectionStore extends ChangeNotifier {
   Future<void> clearAll() async {
     var changed = false;
     for (var i = 0; i < _boxes.length; i++) {
-      if (_boxes[i] != const BoxData()) {
-        _boxes[i] = const BoxData();
+      if (_boxes[i] != BoxData()) {
+        _boxes[i] = BoxData();
         changed = true;
       }
     }

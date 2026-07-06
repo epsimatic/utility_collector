@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../constants.dart';
 import '../state/collection_store.dart';
 import '../widgets/box_tile.dart';
 import 'box_input_screen.dart';
@@ -19,16 +20,19 @@ class OverviewScreen extends StatelessWidget {
   String _formatValue(double? v) => v == null ? '' : v.toStringAsFixed(2);
 
   String _buildCsv() {
-    final buffer = StringBuffer('Квартира,T0,T1,T2');
+    final buffer = StringBuffer('Квартира');
+    for (var m = 0; m < kMetricCount; m++) {
+      buffer.write(',${metricLabel(m)}');
+    }
     for (var i = 0; i < store.boxCount; i++) {
       final box = store.boxAt(i);
       final boxNumber = i + 1;
       if (box.isEmpty) continue;
-      buffer
-        ..write('\n$boxNumber,')
-        ..write('${_formatValue(box.t0)},')
-        ..write('${_formatValue(box.t1)},')
-        ..write(_formatValue(box.t2));
+      buffer.write('\n$boxNumber,');
+      for (var m = 0; m < box.metricCount; m++) {
+        if (m > 0) buffer.write(',');
+        buffer.write(_formatValue(box.valueAt(m)));
+      }
     }
     return buffer.toString();
   }
@@ -42,9 +46,12 @@ class OverviewScreen extends StatelessWidget {
       final box = store.boxAt(i);
       final boxNumber = i + 1;
       final parts = <String>[];
-      if (box.t0 != null) parts.add('счётчик T0: ${_formatValue(box.t0)}');
-      if (box.t1 != null) parts.add('счётчик T1: ${_formatValue(box.t1)}');
-      if (box.t2 != null) parts.add('счётчик T2: ${_formatValue(box.t2)}');
+      for (var m = 0; m < box.metricCount; m++) {
+        final v = box.valueAt(m);
+        if (v != null) {
+          parts.add('счётчик ${metricLabel(m)}: ${_formatValue(v)}');
+        }
+      }
       if (parts.isEmpty) continue;
       buffer.write('\nКвартира $boxNumber, ${parts.join(', ')}');
     }

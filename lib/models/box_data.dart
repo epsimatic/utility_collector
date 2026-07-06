@@ -1,65 +1,55 @@
 import 'package:flutter/foundation.dart';
 
-enum BoxMetric { t0, t1, t2 }
+import '../constants.dart';
 
 @immutable
 class BoxData {
-  const BoxData({this.t0, this.t1, this.t2});
+  BoxData({int? metricCount, List<double?>? values})
+    : _values = values ?? List.filled(metricCount ?? kMetricCount, null);
 
-  final double? t0;
-  final double? t1;
-  final double? t2;
+  final List<double?> _values;
 
-  bool get hasT0 => t0 != null;
-  bool get hasT1 => t1 != null;
-  bool get hasT2 => t2 != null;
+  int get metricCount => _values.length;
 
-  bool get isComplete => hasT0 || (hasT1 && hasT2);
-  bool get isEmpty => !hasT0 && !hasT1 && !hasT2;
-  String get status => hasT0
-      ? 'Заполнено (T0)'
-      : isComplete
-      ? 'Заполнено (T1/T2)'
-      : isEmpty
-      ? 'Не заполнено'
-      : 'Частично';
+  double? valueAt(int index) => _values[index];
 
-  double? valueFor(BoxMetric slot) => switch (slot) {
-    BoxMetric.t0 => t0,
-    BoxMetric.t1 => t1,
-    BoxMetric.t2 => t2,
-  };
+  bool get isComplete => _values.any((v) => v != null);
+  bool get isEmpty => _values.every((v) => v == null);
 
-  BoxData copyWithMetric(BoxMetric slot, double? value, {required bool clear}) {
-    return switch (slot) {
-      BoxMetric.t0 =>
-        clear
-            ? BoxData(t0: null, t1: t1, t2: t2)
-            : BoxData(t0: value, t1: t1, t2: t2),
-      BoxMetric.t1 =>
-        clear
-            ? BoxData(t0: t0, t1: null, t2: t2)
-            : BoxData(t0: t0, t1: value, t2: t2),
-      BoxMetric.t2 =>
-        clear
-            ? BoxData(t0: t0, t1: t1, t2: null)
-            : BoxData(t0: t0, t1: t1, t2: value),
-    };
+  String get status {
+    final filled = [
+      for (var i = 0; i < _values.length; i++)
+        if (_values[i] != null && _values[i] != 0) metricLabel(i),
+    ];
+    return filled.isEmpty ? 'Не заполнено' : filled.join(', ');
   }
 
-  Map<String, dynamic> toJson() => {'t0': t0, 't1': t1, 't2': t2};
+  BoxData copyWithMetric(int index, double? value, {required bool clear}) {
+    final next = List<double?>.of(_values);
+    next[index] = clear ? null : value;
+    return BoxData(values: next);
+  }
 
-  factory BoxData.fromJson(Map<String, dynamic> json) => BoxData(
-    t0: (json['t0'] as num?)?.toDouble(),
-    t1: (json['t1'] as num?)?.toDouble(),
-    t2: (json['t2'] as num?)?.toDouble(),
-  );
+  Map<String, dynamic> toJson() => {'metrics': _values};
+
+  factory BoxData.fromJson(Map<String, dynamic> json) {
+    final raw = json['metrics'] as List?;
+    if (raw == null) return BoxData();
+    return BoxData(
+      values: raw.map((e) => e == null ? null : (e as num).toDouble()).toList(),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is BoxData && other.t0 == t0 && other.t1 == t1 && other.t2 == t2;
+      other is BoxData &&
+          other._values.length == _values.length &&
+          List.generate(
+            _values.length,
+            (i) => other._values[i] == _values[i],
+          ).every((e) => e);
 
   @override
-  int get hashCode => Object.hash(t0, t1, t2);
+  int get hashCode => Object.hashAll(_values);
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/box_data.dart';
+import '../constants.dart';
 import '../state/collection_store.dart';
 
 class BoxInputScreen extends StatefulWidget {
@@ -16,21 +16,20 @@ class BoxInputScreen extends StatefulWidget {
 
 class _BoxInputScreenState extends State<BoxInputScreen> {
   late int _index;
-  late final Map<BoxMetric, TextEditingController> _controllers;
-  final Map<BoxMetric, FocusNode> _focusNodes = {
-    for (final s in BoxMetric.values) s: FocusNode(),
-  };
+  late final List<TextEditingController> _controllers;
+  late final List<FocusNode> _focusNodes;
 
   @override
   void initState() {
     super.initState();
     _index = widget.initialIndex.clamp(0, widget.store.boxCount - 1);
-    _controllers = {
-      for (final slot in BoxMetric.values)
-        slot: TextEditingController(
-          text: _format(widget.store.boxAt(_index).valueFor(slot)),
-        ),
-    };
+    _controllers = List.generate(
+      kMetricCount,
+      (i) => TextEditingController(
+        text: _format(widget.store.boxAt(_index).valueAt(i)),
+      ),
+    );
+    _focusNodes = List.generate(kMetricCount, (_) => FocusNode());
   }
 
   String _format(double? v) {
@@ -39,8 +38,8 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     return v.toString();
   }
 
-  void _commitField(BoxMetric slot) {
-    final text = _controllers[slot]!.text.trim();
+  void _commitField(int slot) {
+    final text = _controllers[slot].text.trim();
     if (text.isEmpty) {
       widget.store.setMetric(_index, slot, null, clear: true);
       return;
@@ -53,7 +52,7 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
   }
 
   void _commitAll() {
-    for (final slot in BoxMetric.values) {
+    for (var slot = 0; slot < kMetricCount; slot++) {
       _commitField(slot);
     }
   }
@@ -64,9 +63,9 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     _commitAll();
     setState(() {
       _index = newIndex;
-      for (final slot in BoxMetric.values) {
-        _controllers[slot]!.text = _format(
-          widget.store.boxAt(_index).valueFor(slot),
+      for (var slot = 0; slot < kMetricCount; slot++) {
+        _controllers[slot].text = _format(
+          widget.store.boxAt(_index).valueAt(slot),
         );
       }
     });
@@ -74,10 +73,10 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
 
   @override
   void dispose() {
-    for (final c in _controllers.values) {
+    for (final c in _controllers) {
       c.dispose();
     }
-    for (final f in _focusNodes.values) {
+    for (final f in _focusNodes) {
       f.dispose();
     }
     super.dispose();
@@ -135,11 +134,11 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
                   spacing: 8.0,
                   children: [
                     SizedBox.shrink(),
-                    for (final slot in BoxMetric.values)
+                    for (var slot = 0; slot < kMetricCount; slot++)
                       _MetricField(
-                        label: "Расход ${slot.name.toUpperCase()}",
-                        controller: _controllers[slot]!,
-                        focusNode: _focusNodes[slot]!,
+                        label: 'Расход ${metricLabel(slot)}',
+                        controller: _controllers[slot],
+                        focusNode: _focusNodes[slot],
                         onCommit: () => _commitField(slot),
                       ),
                     SizedBox.shrink(),
