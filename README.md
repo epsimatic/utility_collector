@@ -1,17 +1,28 @@
-# utility_collector
+# Сбор счётчиков
 
-A new Flutter project.
+Мобильное приложение на Flutter для сбора показаний счётчиков (вода, электричество, газ и т.д.) по квартирам.
 
-## Getting Started
+## Возможности
 
-This project is a starting point for a Flutter application.
+- Учёт показаний по нескольким тарифам для каждой квартиры
+- Настраиваемое количество и нумерация тарифов
+- Экспорт данных в CSV (Excel) и текстовый формат
+- Отправка данных через стандартную функцию "Поделиться" телефона
+- Светлая и тёмная тема
+- Хранение данных между запусками приложения
 
-A few resources to get you started if this is your first Flutter project:
+## Платформы
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Android 8+
+- macOS (целевая платформа разработки)
+- Потенциально iOS, Linux, Windows и Web
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Начало работы
+
+### Скачайте сборку под Android:
+
+Щёлкните [Actions](https://github.com/epsimatic/utility_collector/actions) вверху страницы, щёлкните по первовому пункту с зелёной галочкой и загрузите .apk файл в конце страницы.
+
+### Собрать самому под любую ОС:
+
+См. [INSTALL.md](INSTALL.md)
