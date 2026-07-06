@@ -11,11 +11,15 @@
 - Светлая и тёмная тема
 - Хранение данных между запусками приложения
 
+|   |   |   |
+|---|---|---|
+|![](.github/screenshot1.png)|![](.github/screenshot2.png)|![](.github/screenshot3.png)|
+
 ## Платформы
 
 - Android 8+
 - macOS (целевая платформа разработки)
-- Потенциально iOS, Linux, Windows и Web
+- Должно работать на iOS, Linux, Windows и Web
 
 ## Начало работы
 
