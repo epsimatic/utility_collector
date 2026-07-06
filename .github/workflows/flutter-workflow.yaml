@@ -25,7 +25,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-24.04 # or ubuntu-24.04-arm
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: Clone repository
@@ -58,8 +58,7 @@ jobs:
 
   test:
     name: Test
-    # needs: analyze
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: Clone repository
@@ -90,17 +89,10 @@ jobs:
           path: test-results.json
           reporter: flutter-json
 
-      # - name: LCOV Summary
-      #   uses: pre-history/lcov-summary-action@lcov-summary-action-v0.6.1
-      #   # https://github.com/pre-history/lcov-summary-action
-      #   with:
-      #     coverage-threshold: 1
-      #     # comment-on-pr: true
-
   build_apk:
     name: Build APK
     needs: [analyze, test]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - name: Clone repository
