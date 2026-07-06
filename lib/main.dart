@@ -16,6 +16,7 @@ class UtilityCollectorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Сбор счётчиков',
+      debugShowCheckedModeBanner: false,
       // locale: const Locale('ru', 'RU'),
       // supportedLocales: const [Locale('en', 'US'), Locale('ru', 'RU')],
       theme: ThemeData(
