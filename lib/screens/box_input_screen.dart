@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:watch_it/watch_it.dart';
+import 'package:torch_light/torch_light.dart';
 
 import '../locator.dart';
 import '../state/app_settings.dart';
@@ -19,10 +20,21 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
   late int _index;
   late final List<TextEditingController> _controllers;
   late final List<FocusNode> _focusNodes;
+  bool isTorchAvailable = false;
+  bool isTorchEnabled = false;
 
   @override
   void initState() {
     super.initState();
+
+    TorchLight.isTorchAvailable()
+        .then((result) {
+          setState(() {
+            isTorchAvailable = result;
+          });
+        })
+        .catchError((_) => null);
+
     final store = getIt<CollectionStore>();
     final metricCount = getIt<AppSettings>().metricCount;
     _index = widget.initialIndex.clamp(0, store.boxCount - 1);
@@ -38,6 +50,26 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     if (v == null) return '';
     if (v == v.truncateToDouble()) return v.toInt().toString();
     return v.toString();
+  }
+
+  Future<void> _setTorch(bool enable) async {
+    if (!isTorchAvailable) return;
+    try {
+      if (enable) {
+        await TorchLight.enableTorch();
+      } else {
+        await TorchLight.disableTorch();
+      }
+      if (!mounted) return;
+      setState(() {
+        isTorchEnabled = enable;
+      });
+    } on Exception catch (_) {
+      if (!mounted) return;
+      setState(() {
+        isTorchEnabled = false;
+      });
+    }
   }
 
   void _commitField(int slot) {
@@ -77,6 +109,7 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
 
   @override
   void dispose() {
+    _disableTorch();
     for (final c in _controllers) {
       c.dispose();
     }
@@ -84,6 +117,15 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
       f.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _disableTorch() async {
+    if (!isTorchEnabled) return;
+    try {
+      await TorchLight.disableTorch();
+    } on Exception catch (_) {
+      // Handle error
+    }
   }
 
   @override
@@ -97,7 +139,23 @@ class _BoxInputScreenState extends State<BoxInputScreen> {
     final boxNumber = _index + 1;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Квартира')),
+      appBar: AppBar(
+        title: const Text('Квартира'),
+        actions: !isTorchAvailable
+            ? null
+            : [
+                Icon(Icons.lightbulb),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: Switch(
+                    value: isTorchEnabled,
+                    onChanged: isTorchAvailable
+                        ? (value) => _setTorch(value)
+                        : null,
+                  ),
+                ),
+              ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
