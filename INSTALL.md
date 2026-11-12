@@ -75,9 +75,8 @@ Run Android Studio, proceed with **Standard installation**. When done, click:
 - macOS, Flutter latest:   
    ```bash
    brew install --cask flutter
-   # TODO: Что ещё?
    ```
-   **Flutter installation directory** is `???`
+   **Flutter installation directory** is most likely `/opt/homebrew/share/flutter` (printed in console)
 
 
 - macOS, Flutter v3.44.2:   
@@ -143,7 +142,7 @@ See also — official manual: https://docs.flutter.dev/get-started/install
    ```bash
    brew install --cask vscodium
    ```   
-- Ubuntu Linux: install Codium from the Ubuntu Software Center or [download latest release .deb](https://github.com/vscodium/vscodium/releases)
+- Ubuntu Linux: install **Codium** from the Ubuntu Software Center or [download latest release .deb](https://github.com/vscodium/vscodium/releases)
 - Others: see [docs](https://vscodium.com/#install)   
 
 
@@ -160,8 +159,15 @@ Then,
     - Point the app to to **Flutter installation directory**.
 9. When prompted **Which Flutter template?**, ignore it. Press <kbd>Esc</kbd>.
 
-
 # Сборка и запуск:
+
+## Подготовка Android-телефона:
+
+- [Включите режим разработчика](https://www.android.com/intl/en_uk/articles/enable-android-developer-settings/) в системе Android.
+- Подключите телефон проводом (рекомендуется USB3).
+- Разрешите отладку по USB в предупреждении телефона.
+- Переподключите телефон и убедитесь, что новых предупреждений нет.
+- Проверьте вывод команды `flutter devices` и `adb devices`, там должен быть ваш телефон.
 
 ## В VSCodium:
 
