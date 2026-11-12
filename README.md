@@ -25,7 +25,7 @@
 
 ### Скачайте сборку под Android:
 
-Щёлкните [Actions](https://github.com/epsimatic/utility_collector/actions) вверху страницы, щёлкните по первовому пункту с зелёной галочкой и загрузите .apk файл в конце страницы.
+Щёлкните [Actions](https://github.com/epsimatic/utility_collector/actions) вверху страницы, щёлкните по первовому пункту с зелёной галочкой и загрузите .apk файл в конце страницы. Файла там может не быть, тогда попросите [epsimatic](https://github.com/epsimatic) настроить сборку релизов
 
 ### Собрать самому под любую ОС:
 
